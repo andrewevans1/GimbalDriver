@@ -1,5 +1,5 @@
-#ifndef Motor_h
-#define Motor_h
+#ifndef GimbalDriver_h
+#define GimbalDriver_h
 
 #include "Arduino.h"
 
@@ -8,8 +8,10 @@ class Motor
     public:
         Motor(int stepPin, int dirPin, int MS1Pin, int MS2Pin, int ENPin);
         void setResolution(int resolution);
+        double getPos();
+        void setPos(double pos);
         void moveMotor(double angle);
-        void oscillate(double maxAngle);
+        void oscillate(double maxAngle, int loops);
         void enableMotor();
         void reset();
     private:
@@ -23,7 +25,7 @@ class Motor
 
         void stepForward(int steps);
         void reverseStep(int steps);
-        int angleToSteps(double angle, int resolution);
+        int angleToSteps(double angle);
 };
 
 class MotorController 

@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "MotorDriver.h"
+#include "GimbalDriver.h"
 
 Motor::Motor(int stepPin, int dirPin, int MS1Pin, int MS2Pin, int ENPin)
 {
@@ -17,6 +17,12 @@ Motor::Motor(int stepPin, int dirPin, int MS1Pin, int MS2Pin, int ENPin)
     _pos = 0;
 }
 
+double Motor::getPos(){
+    return _pos;
+}
+void Motor::setPos(double pos){
+    _pos = pos;
+}
 void Motor::stepForward(int steps){
     digitalWrite(_dirPin, LOW); //Pull direction pin low to move "forward"
     for(int i= 0; i<steps; i++) { //loop number of steps to take 
@@ -35,8 +41,8 @@ void Motor::reverseStep(int steps){
       delay(1);
     }
 }
-int Motor::angleToSteps(double angle, int resolution){
-
+int Motor::angleToSteps(double angle){
+    return angle*(200/360)*_resolution; //motor has 200 finite steps per revolution
 }
 
 void Motor::setResolution(int resolution){
@@ -64,7 +70,7 @@ void Motor::setResolution(int resolution){
     _resolution = resolution;
 }
 void Motor::moveMotor(double angle){
-    int steps = angleToSteps(abs(angle), _resolution);
+    int steps = angleToSteps(abs(angle));
     if (angle > 0){
         stepForward(steps);
     }
@@ -75,8 +81,60 @@ void Motor::moveMotor(double angle){
         return;
     }
 }
-void Motor::oscillate(double maxAngle){
-    return;
+void Motor::oscillate(double maxAngle, int loops){
+    //TODO: check that motor begins at start pos
+    
+    int maxSteps = angleToSteps(maxAngle);
+    //initial displacement
+    int state = digitalRead(_dirPin);
+    if(state == HIGH)
+        digitalWrite(_dirPin, LOW);
+    
+    else if(state ==LOW)
+        digitalWrite(_dirPin,HIGH);
+    
+    for(int j = 1; j < maxSteps; j++)
+    {
+        digitalWrite(_stepPin,HIGH); //Trigger one step
+        delay(1);
+        digitalWrite(_stepPin,LOW); //Pull step pin low so it can be triggered again
+        delay(1);
+    }
+
+    for(int i = 0; i<loops; i++)  //Loop the forward stepping enough times for motion to be visible
+    {
+        //Read direction pin state and change it
+        state = digitalRead(_dirPin);
+        if(state == HIGH)
+            digitalWrite(_dirPin, LOW);
+        
+        else if(state ==LOW)
+            digitalWrite(_dirPin,HIGH);
+        
+        for(int j = 1; j < maxSteps*2; j++)
+        {
+            digitalWrite(_stepPin,HIGH); //Trigger one step
+            delay(1);
+            digitalWrite(_stepPin,LOW); //Pull step pin low so it can be triggered again
+            delay(1);
+        }
+        
+    }
+    //return to start pos
+    state = digitalRead(_dirPin);
+    if(state == HIGH)
+        digitalWrite(_dirPin, LOW);
+    
+    else if(state ==LOW)
+        digitalWrite(_dirPin,HIGH);
+    
+    for(int j = 1; j < maxSteps; j++)
+    {
+        digitalWrite(_stepPin,HIGH); //Trigger one step
+        delay(1);
+        digitalWrite(_stepPin,LOW); //Pull step pin low so it can be triggered again
+        delay(1);
+    }
 }
 void Motor::enableMotor(){
     digitalWrite(_ENPin, LOW);
