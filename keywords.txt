@@ -1,0 +1,10 @@
+Motor   KEYWORD1
+MotorController KEYWORD1
+setResolution   KEYWORD2
+moveMotor   KEYWORD2
+oscillate   KEYWORD2
+enableMotor KEYWORD2
+reset   KEYWORD2
+stepForward    KEYWORD2
+reverseStep    KEYWORD2
+angleToSteps    KEYWORD2
