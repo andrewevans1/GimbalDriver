@@ -31,9 +31,11 @@ class Motor
 class MotorController 
 {
     public:
-        MotorController(Motor inner_motor, Motor outer_motor);
+        MotorController(Motor& inner_motor, Motor& outer_motor);
         void point(double elevation, double azimuth);
-
+    private:
+        Motor& _inner_motor;
+        Motor& _outer_motor;
 };
 
 #endif

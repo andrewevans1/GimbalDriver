@@ -142,3 +142,20 @@ void Motor::enableMotor(){
 void Motor::reset(){
     return;
 }
+
+
+MotorController::MotorController(Motor& inner_motor, Motor& outer_motor) {
+    _inner_motor = inner_motor;
+    _outer_motor = outer_motor;
+}
+void MotorController::point(double elevation, double azimuth){
+    double coords[] = {sin(elevation) * cos(azimuth), sin(elevation)*sin(azimuth), cos(elevation) };
+    double theta = asin(-coords[1]);
+    double phi = asin(coords[0] / cos(theta));
+    double outerRot = theta - _outer_motor.getPos();
+    double innerRot = phi - _inner_motor.getPos();
+    _outer_motor.setPos(theta);
+    _inner_motor.setPos(phi);
+    _outer_motor.moveMotor(outerRot);
+    _inner_motor.moveMotor(innerRot);
+}

@@ -1,4 +1,4 @@
-#include <MotorDriver.h>
+#include <GimbalDriver.h>
 
 #define STEP_1 10
 #define DIR_1  9
@@ -13,6 +13,7 @@
 
 Motor inner(STEP_1, DIR_1, MS1_1, MS2_1, EN_1);
 Motor outer(STEP_2, DIR_2, MS1_2, MS2_2, EN_2);
+MotorController controller(inner, outer);
 
 void setup() {
   // put your setup code here, to run once:
@@ -23,4 +24,5 @@ void loop() {
   // put your main code here, to run repeatedly:
   inner.moveMotor(10);
   outer.moveMotor(-5.3);
+  controller.point(5,5);
 }

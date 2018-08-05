@@ -26,6 +26,7 @@ double accel_x, accel_y, accel_z;
 //initialize motors
 Motor inner(STEP_1, DIR_1, MS1_1, MS2_1, EN_1);
 Motor outer(STEP_2, DIR_2, MS1_2, MS2_2, EN_2);
+MotorController motorController(inner, outer);
 
 void setup() {
   Serial.begin(9600);
@@ -50,8 +51,8 @@ void loop() {
   }
 
   //act based on filled command array
-  if (commandArray[0] == "point") {
-    point(commandArray[0].toDouble(), commandArray[1].toDouble());
+  if (commandArray[0] == "point"){
+    motorController.point(commandArray[1].toDouble(), commandArray[2].toDouble());
   }
   else if (commandArray[0] == "move"){
     
@@ -78,16 +79,4 @@ void loop() {
     Serial.println(" or [point elevation azimuth] for pointing");
   }
   
-}
-
-bool point(double elevation, double azimuth){
-  double coords[] = {sin(elevation) * cos(azimuth), sin(elevation)*sin(azimuth), cos(elevation) };
-  double theta = asin(-coords[1]);
-  double phi = asin(coords[0] / cos(theta));
-  double outerRot = theta - outer.getPos();
-  double innerRot = phi - inner.getPos();
-  outer.setPos(theta);
-  inner.setPos(phi);
-  outer.moveMotor(outerRot);
-  inner.moveMotor(innerRot);
 }
