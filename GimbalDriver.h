@@ -21,7 +21,7 @@ class Motor
         int _MS2Pin;
         int _ENPin;
         int _resolution;
-        int _pos;
+        double _pos;
 
         void stepForward(int steps);
         void reverseStep(int steps);
@@ -33,9 +33,8 @@ class MotorController
     public:
         MotorController(Motor& inner_motor, Motor& outer_motor);
         void point(double elevation, double azimuth);
-    private:
-        Motor& _inner_motor;
-        Motor& _outer_motor;
+        Motor _inner_motor;
+        Motor _outer_motor;
 };
 
 #endif

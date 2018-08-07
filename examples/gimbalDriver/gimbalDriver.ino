@@ -30,12 +30,12 @@ MotorController motorController(inner, outer);
 
 void setup() {
   Serial.begin(9600);
-  Serial.setTimeout(50);
+  Serial.setTimeout(100);
   Serial.println("Begin motor control");
   Serial.println();
+
   //Print function list for user selection
-  Serial.println("Enter command in form:"); 
-  Serial.println("[motor(inner/outer) direction(ccw/cw) angle(degrees) stepResolution(1/2/4/8)");
+  Serial.println("Enter command");
   Serial.println();
 }
 
@@ -43,24 +43,43 @@ void loop() {
   //parse command input
   String commandArray[3]; //[move motor angle] for individual movement
                           // or [point elevation azimuth] for pointing
-  int i = 0;
-  while(Serial.available()){
-    String tmp = Serial.readStringUntil(" ");
-    commandArray[i] = tmp;
-    i++;
+  while (!Serial.available()){
+    ;
   }
 
+  while(Serial.available()){
+    //String tmp = Serial.readStringUntil(' ');
+    //commandArray[i] = tmp;
+    //Serial.println(tmp);
+    //i++;
+    commandArray[0] = Serial.readStringUntil(' ');
+    commandArray[1] = Serial.readStringUntil(' ');
+    commandArray[2] = Serial.readStringUntil(' ');   
+  }
+
+  Serial.print(commandArray[0]); Serial.print(' ');
+  Serial.print(commandArray[1]); Serial.print(' ');
+  Serial.println(commandArray[2]);
   //act based on filled command array
   if (commandArray[0] == "point"){
-    motorController.point(commandArray[1].toDouble(), commandArray[2].toDouble());
+    Serial.print("1: " + commandArray[1]); Serial.println("2: " + commandArray[2]);
+    motorController.point(commandArray[1].toDouble(), commandArray[1].toDouble());
+  }
+  else if (commandArray[0] == "test"){
+    motorController._inner_motor.enableMotor();
+    motorController._inner_motor.moveMotor(100);
   }
   else if (commandArray[0] == "move"){
     
     if (commandArray[1] == "outer"){
       outer.moveMotor(commandArray[2].toDouble());
+      //Serial.println("got it");
+    }
+    else if (commandArray[1] == "inner"){
+      inner.moveMotor(commandArray[2].toDouble());
     }
     else {
-      inner.moveMotor(commandArray[2].toDouble());
+      Serial.println("please enter valid motor selection");
     }
       
   }
@@ -71,12 +90,17 @@ void loop() {
     else if(commandArray[1] == "inner"){
       inner.setResolution(commandArray[2].toInt());
     }
+    else {
+      Serial.println("please enter valid motor selection");
+    }
   }
   else {
     Serial.println("please enter a valid command");
     Serial.println("[set motor resolution] to set a motor's resolution");
     Serial.println("[move motor angle] for individual movement");
-    Serial.println(" or [point elevation azimuth] for pointing");
+    Serial.println("or [point elevation azimuth] for pointing");
   }
   
+  inner.reset();
+  outer.reset();
 }
