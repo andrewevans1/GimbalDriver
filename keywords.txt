@@ -1,10 +1,16 @@
 Motor	KEYWORD1
 MotorController	KEYWORD1
 setResolution	KEYWORD2
+getPos		KEYWORD2
 moveMotor	KEYWORD2
 oscillate	KEYWORD2
 enableMotor	KEYWORD2
+disableMotor	KEYWORD2
 reset	KEYWORD2
+getState	KEYWORD2
+angleToSteps	KEYWORD2
 stepForward	KEYWORD2
 reverseStep	KEYWORD2
-angleToSteps	KEYWORD2
+setPos	KEYWORD2
+point	KEYWORD2
+spin	KEYWORD2

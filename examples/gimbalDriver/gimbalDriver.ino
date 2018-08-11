@@ -107,10 +107,10 @@ void loop() {
   }
   else if (commandArray[0] == "get"){
     if(commandArray[1] == "outer"){
-      Serial.println(outer.getPinStates());  
+      Serial.println(outer.getState());  
     }
     else if(commandArray[1] == "inner"){
-      Serial.println(inner.getPinStates());  
+      Serial.println(inner.getState());  
     }
     else {
       Serial.println("please enter valid motor selection");
