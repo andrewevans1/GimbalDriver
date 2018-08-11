@@ -1,6 +1,9 @@
 #include "Arduino.h"
 #include "GimbalDriver.h"
 
+#define RAD_TO_DEG 57.295779513082320876798154814105
+
+//TODO: take steps per revolution as constructor argument
 Motor::Motor(int stepPin, int dirPin, int MS1Pin, int MS2Pin, int ENPin)
 {
     _stepPin = stepPin;
@@ -23,7 +26,7 @@ Motor::Motor(int stepPin, int dirPin, int MS1Pin, int MS2Pin, int ENPin)
 }
 
 double Motor::getPos(){
-    Serial.print("current pos"); Serial.println(_pos);
+    Serial.print("current pos "); Serial.println(_pos);
     return _pos;
 }
 void Motor::setPos(double pos){
@@ -38,6 +41,7 @@ void Motor::stepForward(int steps){
       delay(1);
       //Serial.println(String(i));
     }
+    _pos += steps/_resolution;
     Serial.println("finished stepping forward");
 }
 void Motor::reverseStep(int steps){
@@ -48,9 +52,10 @@ void Motor::reverseStep(int steps){
       digitalWrite(_stepPin,LOW); //Pull step pin low so it can be triggered again
       delay(1);
     }
+    _pos -= steps/_resolution;
 }
 int Motor::angleToSteps(double angle){
-    int steps = angle*(200.0/360.0)*_resolution; //motor has 200 finite steps per revolution
+    int steps = angle*(2048.0/360.0)*_resolution; //motor has 2080 finite steps per revolution according to data sheet
     Serial.println(String(steps));
     return steps;
 }
@@ -92,11 +97,13 @@ void Motor::moveMotor(double angle){
     else{
         return;
     }
+    disableMotor();
 }
 void Motor::oscillate(double maxAngle, int loops){
     //TODO: check that motor begins at start pos
     enableMotor();
     int maxSteps = angleToSteps(maxAngle);
+    Serial.println("steps " + String(maxSteps));
     //initial displacement
     int state = digitalRead(_dirPin);
     if(state == HIGH)
@@ -112,6 +119,7 @@ void Motor::oscillate(double maxAngle, int loops){
         digitalWrite(_stepPin,LOW); //Pull step pin low so it can be triggered again
         delay(1);
     }
+    delay(250);
 
     for(int i = 0; i<loops; i++)  //Loop the forward stepping enough times for motion to be visible
     {
@@ -130,6 +138,7 @@ void Motor::oscillate(double maxAngle, int loops){
             digitalWrite(_stepPin,LOW); //Pull step pin low so it can be triggered again
             delay(1);
         }
+        delay(250);
         
     }
     //return to start pos
@@ -147,63 +156,94 @@ void Motor::oscillate(double maxAngle, int loops){
         digitalWrite(_stepPin,LOW); //Pull step pin low so it can be triggered again
         delay(1);
     }
+    
+    disableMotor();
 }
 void Motor::enableMotor(){
     Serial.println("enabling");
     digitalWrite(_ENPin, LOW);
 }
+void Motor::disableMotor(){
+    Serial.println("disabling");
+    digitalWrite(_ENPin, HIGH);
+}
 void Motor::reset(){
     digitalWrite(_stepPin, LOW);
     digitalWrite(_dirPin, LOW);
-    digitalWrite(_MS1Pin, LOW);
-    digitalWrite(_MS2Pin, LOW);
+    //digitalWrite(_MS1Pin, LOW);
+    //digitalWrite(_MS2Pin, LOW);
     digitalWrite(_ENPin, HIGH);
 }
 
-/*
-MotorController::MotorController(Motor* inner_motor, Motor* outer_motor) {
-    _inner_motor = inner_motor;
-    _outer_motor = outer_motor;
-}*/
+String Motor::getState(){
+    String tmp_str = "StepPin: ";
+    tmp_str += String(digitalRead(_stepPin));
+    tmp_str += "\nDirPin: ";
+    tmp_str += String(digitalRead(_dirPin));
+    tmp_str += "\nMS1Pin: ";
+    tmp_str += String(digitalRead(_MS1Pin));
+    tmp_str += "\nMS2Pin: ";    
+    tmp_str += String(digitalRead(_MS2Pin));
+    tmp_str += "\nENPin: ";
+    tmp_str += String(digitalRead(_ENPin));
+    tmp_str += "\nPos: ";
+    tmp_str += String(_pos);
+    tmp_str += "\nResolution: ";
+    tmp_str += String(_resolution);
+    return(tmp_str);
+}
+
 MotorController::MotorController(Motor& inner_motor, Motor& outer_motor):
     _inner_motor(inner_motor),
     _outer_motor(outer_motor) {}
-/*
-void MotorController::point(double elevation, double azimuth){
-    Serial.println(String(azimuth));
-    //_outer_motor.setPos(0.0);
-    //_inner_motor.setPos(0.0);
-    Serial.print("elevation"); Serial.print(String(elevation));
-    Serial.print("azimuth "); Serial.println(String(azimuth));
-    double coords[] = {sin(elevation) * cos(azimuth), sin(elevation)*sin(azimuth), cos(elevation) };
-    Serial.print("coord 1"); Serial.print(String(coords[0]));
-    Serial.print("coord 2"); Serial.println(String(coords[1]));
-    double theta = asin(-coords[1]);
-    Serial.println(String(theta));
-    double phi = asin(coords[0] / cos(theta));
-    Serial.println(String(phi));
-    double outerRot = theta - _outer_motor.getPos();
-    double innerRot = phi - _inner_motor.getPos();
-    Serial.print("outerRot "); Serial.print(String(outerRot));
-    Serial.print(" innerRot "); Serial.println(String(innerRot));
-    //_outer_motor.setPos(theta);
-    //_inner_motor.setPos(phi);
-    //_outer_motor.moveMotor(outerRot);
-    _outer_motor.moveMotor(10);
-    _inner_motor.moveMotor(10);
-    //_inner_motor.moveMotor(innerRot);
-}
-*/
+
 void MotorController::point(double elevation, double azimuth){
     double coords[] = {sin(elevation) * cos(azimuth), sin(elevation)*sin(azimuth), cos(elevation) };
     double theta = asin(-coords[1]);
     double phi = asin(coords[0] / cos(theta));
+    theta = theta * RAD_TO_DEG;
+    phi = phi * RAD_TO_DEG;
     double outerRot = theta - _outer_motor.getPos();
     double innerRot = phi - _inner_motor.getPos();
-    _outer_motor.setPos(theta);
-    _inner_motor.setPos(phi);
     Serial.print("outerRot "); Serial.print(String(outerRot));
     Serial.print(" innerRot "); Serial.println(String(innerRot));
     _outer_motor.moveMotor(outerRot);
     _inner_motor.moveMotor(innerRot);
+}
+
+void MotorController::oscillate(double maxAngle, int loops){
+    _inner_motor.oscillate(maxAngle, loops);
+    _outer_motor.oscillate(maxAngle, loops);
+}
+
+void MotorController::spin(double elevation, int loops){
+    //move to starting position
+    point(elevation, 0);
+    //begin oscillations
+    int max_steps = _inner_motor.angleToSteps(elevation);
+    int step_size = 10; //set smaller for smoother movement
+    for (int i = 0; i < loops; i++){
+        //TODO: might get truncation errors here
+        for (int j = 0; j < max_steps/step_size; j++){
+            _inner_motor.moveMotor(step_size);
+            _outer_motor.moveMotor(-step_size);
+        }
+        for (int j = 0; j < max_steps/step_size; j++){
+            _inner_motor.moveMotor(-step_size);
+            _outer_motor.moveMotor(-step_size);
+        }
+        for (int j = 0; j < max_steps/step_size; j++){
+            _inner_motor.moveMotor(-step_size);
+            _outer_motor.moveMotor(step_size);
+        }
+        for (int j = 0; j < max_steps/step_size; j++){
+            _inner_motor.moveMotor(step_size);
+            _outer_motor.moveMotor(step_size);
+        }
+    }
+}
+
+void MotorController::reset(){
+    _inner_motor.moveMotor(-_inner_motor.getPos());
+    _outer_motor.moveMotor(-_outer_motor.getPos());
 }

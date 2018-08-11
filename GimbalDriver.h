@@ -9,11 +9,13 @@ class Motor
         Motor(int stepPin, int dirPin, int MS1Pin, int MS2Pin, int ENPin);
         void setResolution(int resolution);
         double getPos();
-        void setPos(double pos);
         void moveMotor(double angle);
         void oscillate(double maxAngle, int loops);
         void enableMotor();
+        void disableMotor();
         void reset();
+        String getState();
+        int angleToSteps(double angle);
     private:
         int _stepPin;
         int _dirPin;
@@ -25,7 +27,7 @@ class Motor
 
         void stepForward(int steps);
         void reverseStep(int steps);
-        int angleToSteps(double angle);
+        void setPos(double pos);
 };
 
 class MotorController 
@@ -33,6 +35,9 @@ class MotorController
     public:
         MotorController(Motor& inner_motor, Motor& outer_motor);
         void point(double elevation, double azimuth);
+        void oscillate(double maxAngle, int loops);
+        void spin(double elevation, int loops);
+        void reset();
         Motor _inner_motor;
         Motor _outer_motor;
 };

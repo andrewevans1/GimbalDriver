@@ -21,6 +21,7 @@
 #define QUARTER_STEP 4
 #define EIGHTH_STEP 8
 
+#define MAX_ANGLE 150
 //Declare variables for functions
 double accel_x, accel_y, accel_z;
 //initialize motors
@@ -65,10 +66,6 @@ void loop() {
     Serial.print("1: " + commandArray[1]); Serial.println("2: " + commandArray[2]);
     motorController.point(commandArray[1].toDouble(), commandArray[1].toDouble());
   }
-  else if (commandArray[0] == "test"){
-    motorController._inner_motor.enableMotor();
-    motorController._inner_motor.moveMotor(100);
-  }
   else if (commandArray[0] == "move"){
     
     if (commandArray[1] == "outer"){
@@ -94,13 +91,35 @@ void loop() {
       Serial.println("please enter valid motor selection");
     }
   }
+  else if (commandArray[0] == "oscillate"){
+    if(commandArray[1] == "outer"){
+      outer.oscillate(MAX_ANGLE, commandArray[2].toDouble());  
+    }
+    else if(commandArray[1] == "inner"){
+      inner.oscillate(MAX_ANGLE, commandArray[2].toDouble());
+    }
+    else {
+      Serial.println("please enter valid motor selection");
+    }
+  }
+  else if (commandArray[0] == "reset"){
+    motorController.reset();
+  }
+  else if (commandArray[0] == "get"){
+    if(commandArray[1] == "outer"){
+      Serial.println(outer.getPinStates());  
+    }
+    else if(commandArray[1] == "inner"){
+      Serial.println(inner.getPinStates());  
+    }
+    else {
+      Serial.println("please enter valid motor selection");
+    }
+  }
   else {
     Serial.println("please enter a valid command");
     Serial.println("[set motor resolution] to set a motor's resolution");
     Serial.println("[move motor angle] for individual movement");
     Serial.println("or [point elevation azimuth] for pointing");
   }
-  
-  inner.reset();
-  outer.reset();
 }
