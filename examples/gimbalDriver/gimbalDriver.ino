@@ -21,13 +21,15 @@
 #define QUARTER_STEP 4
 #define EIGHTH_STEP 8
 
-#define MAX_ANGLE 150
+#define MAX_ANGLE 30
 //Declare variables for functions
 double accel_x, accel_y, accel_z;
 //initialize motors
-Motor inner(STEP_1, DIR_1, MS1_1, MS2_1, EN_1);
-Motor outer(STEP_2, DIR_2, MS1_2, MS2_2, EN_2);
-MotorController motorController(inner, outer);
+Motor inner(STEP_1, DIR_1, MS1_1, MS2_1, EN_1, MAX_ANGLE);
+Motor outer(STEP_2, DIR_2, MS1_2, MS2_2, EN_2, MAX_ANGLE);
+Motor * pointerToInner = &inner;
+Motor * pointerToOuter = &outer;
+MotorController motorController(pointerToInner, pointerToOuter);
 
 void setup() {
   Serial.begin(9600);
