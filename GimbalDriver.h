@@ -15,7 +15,7 @@ class Motor
         void disableMotor();
         void reset();
         String getState();
-        double checkValidity(double angle);
+        double checkValidMove(double angle);
         int angleToSteps(double angle);
         double stepsToAngle(int steps);
     private:
