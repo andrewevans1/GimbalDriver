@@ -22,8 +22,12 @@
 #define EIGHTH_STEP 8
 
 #define MAX_ANGLE 30.0
+#define OFFSET_X 506
+#define OFFSET_Y 500
+#define OFFSET_Z 518
 //Declare variables for functions
-double accel_x, accel_y, accel_z;
+double x, y, z, mag, norm_x, norm_y, norm_z;
+
 //initialize motors
 Motor inner(STEP_1, DIR_1, MS1_1, MS2_1, EN_1, MAX_ANGLE);
 Motor outer(STEP_2, DIR_2, MS1_2, MS2_2, EN_2, MAX_ANGLE);
@@ -34,6 +38,8 @@ MotorController motorController(pointerToInner, pointerToOuter);
 void setup() {
   Serial.begin(9600);
   Serial.setTimeout(100);
+  analogReference(EXTERNAL); //set anolog reference to 3v3
+
   Serial.println("Begin motor control");
   Serial.println();
 
@@ -135,6 +141,30 @@ void loop() {
     motorController.point(20, -45); delay(500);
     motorController.point(20, 0); delay(500);
     motorController.reset();
+  }
+  else if (commandArray[0] == "accel"){
+    int loops = commandArray[1].toInt();
+    Serial.print("loops: "); Serial.println(loops);
+    for(int i = 0; i < loops; i++){
+      x = analogRead(0);       // read analog input pin 0
+      y = analogRead(1);       // read analog input pin 1
+      z = analogRead(2);       // read analog input pin 20
+      x = x - OFFSET_X;
+      y = y - OFFSET_Y;
+      z = z - OFFSET_Z;
+      mag = sqrt(x*x + y*y + z*z);
+      norm_x = x/mag;
+      norm_y = y/mag;
+      norm_z = z/mag;
+      Serial.print("Vector: ");
+      Serial.print(norm_x);
+      Serial.print(" ");
+      Serial.print(norm_y);
+      Serial.print(" ");
+      Serial.println(norm_z);
+      motorController.point(norm_x, norm_y, norm_z);
+      delay(500);
+    }
   }
   else {
     Serial.println("please enter a valid command");

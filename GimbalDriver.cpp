@@ -271,6 +271,26 @@ void MotorController::point(double elevation_, double azimuth_){
     _outer_motor->moveMotor(outerRot);
     _inner_motor->moveMotor(innerRot);
 }
+void MotorController::point(double x, double y, double z){
+    Serial.print("x: "); Serial.println(String(x));
+    Serial.print("y: "); Serial.println(String(y));
+    Serial.print("z: "); Serial.println(String(z));
+    double theta = asin(-y);
+    double phi = asin(x / cos(theta));
+    Serial.print("theta: "); Serial.println(String(theta));
+    Serial.print("phi: "); Serial.println(String(phi));
+    theta = theta * RAD_TO_DEG;
+    phi = phi * RAD_TO_DEG;
+    
+    double currentOuterAngle = _outer_motor->getPos();
+    double currentInnerAngle = _inner_motor->getPos();
+    double outerRot = theta - currentOuterAngle;
+    double innerRot = phi - currentInnerAngle;
+    Serial.print("outerRot "); Serial.print(String(outerRot));
+    Serial.print(" innerRot "); Serial.println(String(innerRot));
+    _outer_motor->moveMotor(outerRot);
+    _inner_motor->moveMotor(innerRot);
+}
 //Not sure if this does what I want it to
 void MotorController::oscillate(double maxAngle, int loops){
     _inner_motor->oscillate(maxAngle, loops);

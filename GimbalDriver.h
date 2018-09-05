@@ -38,6 +38,7 @@ class MotorController
     public:
         MotorController(Motor* inner_motor, Motor* outer_motor);
         void point(double elevation, double azimuth);
+        void point(double x, double y, double z);
         void oscillate(double maxAngle, int loops);
         void spin(double elevation, int loops);
         void reset();
