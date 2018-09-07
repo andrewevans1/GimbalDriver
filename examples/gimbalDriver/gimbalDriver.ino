@@ -72,7 +72,7 @@ void loop() {
   //act based on filled command array
   if (commandArray[0] == "point"){
     //Serial.print("1: " + commandArray[1]); Serial.println("2: " + commandArray[2]);
-    motorController.point(commandArray[1].toDouble(), commandArray[1].toDouble());
+    motorController.point(commandArray[1].toDouble(), commandArray[2].toDouble());
   }
   else if (commandArray[0] == "move"){
     
