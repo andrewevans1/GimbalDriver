@@ -1,16 +1,17 @@
 #include <GimbalDriver.h>
 
 //Declare pin functions on Arduino
-#define STEP_1 3
-#define DIR_1  2
-#define MS1_1  4
-#define MS2_1  5
-#define EN_1   6
-#define STEP_2 8
-#define DIR_2  7
-#define MS1_2  9
-#define MS2_2  10
-#define EN_2   11
+#define STEP_1 8
+#define DIR_1  7
+#define MS1_1  9
+#define MS2_1  10
+#define EN_1   11
+
+#define STEP_2 3
+#define DIR_2  2
+#define MS1_2  4
+#define MS2_2  5
+#define EN_2   6
 
 #define ACC_X 0
 #define ACC_Y 1
