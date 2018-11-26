@@ -1,6 +1,6 @@
 #include <GimbalDriver.h>
 
-//Declare pin functions on Arduino
+//Declare pin assignments on Arduino Nano
 #define STEP_1 8
 #define DIR_1  7
 #define MS1_1  9
@@ -13,19 +13,22 @@
 #define MS2_2  5
 #define EN_2   6
 
-#define ACC_X 0
+//analog pins
+#define ACC_X 0 
 #define ACC_Y 1
 #define ACC_Z 2
 
+//constants
 #define FULL_STEP 1
 #define HALF_STEP 2
 #define QUARTER_STEP 4
 #define EIGHTH_STEP 8
 
-#define MAX_ANGLE 30.0
-#define OFFSET_X 506
-#define OFFSET_Y 500
-#define OFFSET_Z 518
+#define MAX_ANGLE 30.0 //defined by structure
+//observed necessary offsets for accelerometer
+#define OFFSET_X 0 
+#define OFFSET_Y 0
+#define OFFSET_Z 0
 //Declare variables for functions
 double x, y, z, mag, norm_x, norm_y, norm_z;
 
@@ -38,6 +41,7 @@ MotorController motorController(pointerToInner, pointerToOuter);
 
 void balance(int loops);
 
+//program specific pin assignments for switch
 int BAlANCE_MODE = 12;
 int SPIN_DEMO = 13;
 
@@ -70,29 +74,29 @@ void loop() {
     motorController.spin(25, 1);    
   }
 
-  //full functionality - -direct commanding
+  //full functionality -- direct commanding
   else {
     Serial.println("Please input a command");
     //parse command input
     String commandArray[3]; //[move motor angle] for individual movement
                             // or [point elevation azimuth] for pointing
+    //hang until user input
     while (!Serial.available()){
       ;
     }
 
+    //split commands on space
     while(Serial.available()){
-      //String tmp = Serial.readStringUntil(' ');
-      //commandArray[i] = tmp;
-      //Serial.println(tmp);
-      //i++;
       commandArray[0] = Serial.readStringUntil(' ');
       commandArray[1] = Serial.readStringUntil(' ');
       commandArray[2] = Serial.readStringUntil(' ');   
     }
 
+    //repeat command to user
     Serial.print(commandArray[0]); Serial.print(' ');
     Serial.print(commandArray[1]); Serial.print(' ');
     Serial.println(commandArray[2]);
+
     //act based on filled command array
     if (commandArray[0] == "point"){
       //Serial.print("1: " + commandArray[1]); Serial.println("2: " + commandArray[2]);
